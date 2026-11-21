@@ -1,0 +1,22 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "rooms": {
+      "$room": {
+        ".read": "auth != null && $room.matches(/^[0-9]{6}$/)",
+        ".write": "auth != null && $room.matches(/^[0-9]{6}$/) && !data.exists() && newData.child('meta/owner').val() === auth.uid",
+        "meta": {
+          ".write": "auth != null && data.child('owner').val() === auth.uid && newData.child('owner').val() === auth.uid",
+          ".validate": "newData.hasChildren(['owner','status','teams','tables','total','duration','seed','createdAt']) && newData.child('owner').isString() && (newData.child('status').val() === 'waiting' || newData.child('status').val() === 'running' || newData.child('status').val() === 'ended') && newData.child('total').isNumber() && newData.child('total').val() > 0 && newData.child('total').val() <= 100 && newData.child('duration').isNumber() && newData.child('duration').val() >= 60 && newData.child('duration').val() <= 600"
+        },
+        "players": {
+          "$uid": {
+            ".write": "auth != null && auth.uid === $uid && root.child('rooms').child($room).child('meta').exists() && ((!data.exists() && root.child('rooms').child($room).child('meta/status').val() === 'waiting') || (data.exists() && root.child('rooms').child($room).child('meta/status').val() === 'running' && now <= root.child('rooms').child($room).child('meta/startAt').val() + root.child('rooms').child($room).child('meta/duration').val() * 1000))",
+            ".validate": "newData.hasChildren(['name','team','score','answered','correct']) && newData.child('name').isString() && newData.child('name').val().length > 0 && newData.child('name').val().length <= 25 && newData.child('team').isString() && newData.child('team').val().length > 0 && newData.child('team').val().length <= 25 && newData.child('score').isNumber() && newData.child('answered').isNumber() && newData.child('correct').isNumber() && newData.child('score').val() === newData.child('correct').val() && newData.child('score').val() >= 0 && newData.child('answered').val() >= newData.child('correct').val() && newData.child('answered').val() <= root.child('rooms').child($room).child('meta/total').val() && ((!data.exists() && newData.child('score').val() === 0 && newData.child('answered').val() === 0) || (data.exists() && newData.child('name').val() === data.child('name').val() && newData.child('team').val() === data.child('team').val() && newData.child('answered').val() === data.child('answered').val() + 1 && newData.child('score').val() >= data.child('score').val() && newData.child('score').val() <= data.child('score').val() + 1))"
+          }
+        }
+      }
+    }
+  }
+}
